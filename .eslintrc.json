@@ -10,6 +10,11 @@
   "rules": {
     "no-console": "off",
     "no-underscore-dangle": "off",
-    "semi": "off"
+    "semi": "off",
+    "object-curly-newline": "off",
+    "comma-dangle": "off",
+    "implicit-arrow-linebreak": "off",
+    "operator-linebreak": "off",
+    "function-paren-newline": "off"
   }
 }
