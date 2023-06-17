@@ -16,6 +16,7 @@ class AuthenticationsService {
   }
 
   async verifyRefreshToken(token) {
+    // console.log(token)
     const query = {
       text: 'SELECT token FROM authentications WHERE token = $1',
       values: [token],

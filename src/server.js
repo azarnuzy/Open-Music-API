@@ -2,6 +2,8 @@ require('dotenv').config()
 const Hapi = require('@hapi/hapi')
 const Jwt = require('@hapi/jwt')
 
+const ClientError = require('./exceptions/ClientError')
+
 // albums
 const albums = require('./api/albums')
 const AlbumsService = require('./services/postgres/AlbumsService')
@@ -19,16 +21,21 @@ const UsersValidator = require('./validator/users')
 
 // authentications
 const authentications = require('./api/authentications')
-
-const ClientError = require('./exceptions/ClientError')
 const AuthenticationsService = require('./services/postgres/AuthenticationsService')
 const AuthenticationsValidator = require('./validator/authentications')
+
+// playlists
+const playlists = require('./api/playlists')
+const PlaylistsService = require('./services/postgres/PlaylistsService')
+const PlaylistsValidator = require('./validator/playlists')
+const TokenManager = require('./tokenize/TokenManager')
 
 const init = async () => {
   const albumsService = new AlbumsService()
   const songsService = new SongsService()
   const usersService = new UsersService()
   const authenticationsService = new AuthenticationsService()
+  const playlistsService = new PlaylistsService()
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -86,8 +93,17 @@ const init = async () => {
     {
       plugin: authentications,
       options: {
-        service: authenticationsService,
+        authenticationsService,
+        usersService,
+        tokenManager: TokenManager,
         validator: AuthenticationsValidator,
+      },
+    },
+    {
+      plugin: playlists,
+      options: {
+        service: playlistsService,
+        validator: PlaylistsValidator,
       },
     },
   ])
@@ -108,12 +124,12 @@ const init = async () => {
         return newResponse
       }
 
-      // mempertahankan penganan client error oleh hapi secara ntaive, seperti 404, etc
+      // mempertahankan penanganan client error oleh hapi secara ntaive, seperti 404, etc
       if (!response.isServer) {
         return h.continue
       }
 
-      // pengangan server error sesuai kebutuhan
+      // penanganan server error sesuai kebutuhan
       const newResponse = h.response({
         status: 'error',
         message: 'terjadi kegagalan pada server kami',
