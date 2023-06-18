@@ -46,6 +46,7 @@ class SongsService {
   }
 
   async getSongById(id) {
+    // console.log(id)
     const query = {
       text: 'SELECT * FROM songs WHERE id = $1',
       values: [id],
@@ -53,6 +54,7 @@ class SongsService {
 
     const result = await this._pool.query(query)
 
+    // console.log(result)
     if (!result.rows.length) {
       throw new NotFoundError('Song tidak ditemukan')
     }
