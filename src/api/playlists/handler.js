@@ -18,7 +18,7 @@ class PlaylistsHandler {
       name,
       owner: credentialId,
     })
-    // console.log(playlistId)
+
     const response = h.response({
       status: 'success',
       message: 'Playlist berhasil ditambahkan',

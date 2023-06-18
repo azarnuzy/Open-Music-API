@@ -37,19 +37,30 @@ class PlaylistSongsHandler {
     return response
   }
 
-  async getPlaylistSongsHandler(request) {
+  async getPlaylistSongsHandler(request, h) {
     const { id } = request.params
-    const playlistSongs = await this._playlistSongsService.getSongsByPlaylistId(
-      id
-    )
+    const { id: credentialId } = request.auth.credentials
 
-    const { playlistId } = playlistSongs[0]
-    const songsId = []
-    playlistSongs.forEach((item) => {
-      songsId.push(item.songId)
+    await this._playlistsService.verifyPlaylistAccess(id, credentialId)
+    const songs = await this._playlistSongsService.getSongsByPlaylistId(id)
+
+    let playlist = await this._playlistsService.getPlaylistById(id)
+
+    playlist = {
+      ...playlist,
+      songs,
+    }
+
+    const response = h.response({
+      status: 'success',
+      data: {
+        playlist,
+      },
     })
 
-    console.log(playlistId, songsId)
+    response.code(200)
+    // console.log(response)
+    return response
   }
 }
 

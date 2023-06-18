@@ -41,6 +41,23 @@ class PlaylistsService {
     return result.rows.map(mapDBToModel)
   }
 
+  async getPlaylistById(id) {
+    const query = {
+      text: `SELECT playlists.id, playlists.name, users.username FROM playlists
+      LEFT JOIN users ON users.id = playlists.owner
+      WHERE playlists.id = $1`,
+      values: [id],
+    }
+
+    const result = await this._pool.query(query)
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Playlist tidak ditemukan')
+    }
+
+    return result.rows.map((item) => item)[0]
+  }
+
   async deletePlaylistById(id) {
     const query = {
       text: 'DELETE FROM playlists WHERE id = $1 RETURNING id',
@@ -71,6 +88,10 @@ class PlaylistsService {
     if (playlist.owner !== owner) {
       throw new AuthorizationError('Anda tidak berhak mengakses resource ini')
     }
+  }
+
+  async verifyPlaylistAccess(playlistId, userId) {
+    await this.verifyPlaylistOwner(playlistId, userId)
   }
 
   //   async addSongToPlaylist(songId) {

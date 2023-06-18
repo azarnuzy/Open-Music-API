@@ -2,7 +2,7 @@ const { nanoid } = require('nanoid')
 const { Pool } = require('pg')
 const InvariantError = require('../../exceptions/InvariantError')
 const NotFoundError = require('../../exceptions/NotFoundError')
-const { mapDBToModel } = require('../../utils/playlistSongsIndex')
+// const { mapDBToModel } = require('../../utils/playlistSongsIndex')
 
 class PlaylistSongsService {
   constructor() {
@@ -28,7 +28,7 @@ class PlaylistSongsService {
 
   async getSongsByPlaylistId(id) {
     const query = {
-      text: 'SELECT * FROM playlist_songs WHERE playlist_id = $1',
+      text: 'SELECT s.id, s.title, s.performer FROM playlist_songs p JOIN songs s ON p.song_id=s.id WHERE p.playlist_id = $1',
       values: [id],
     }
 
@@ -38,7 +38,7 @@ class PlaylistSongsService {
       throw new NotFoundError('Playlist tidak ditemukan')
     }
 
-    return result.rows.map(mapDBToModel)
+    return result.rows.map((item) => item)
   }
 }
 
