@@ -6,8 +6,9 @@ const NotFoundError = require('../../exceptions/NotFoundError')
 const AuthorizationError = require('../../exceptions/AuthorizationError')
 
 class PlaylistsService {
-  constructor() {
+  constructor(collaborationsService) {
     this._pool = new Pool()
+    this._collaborationsService = collaborationsService
   }
 
   async addPlaylist({ name, owner }) {
@@ -37,7 +38,7 @@ class PlaylistsService {
     }
 
     const result = await this._pool.query(query)
-    // console.log(result)
+
     return result.rows.map(mapDBToModel)
   }
 
@@ -91,14 +92,21 @@ class PlaylistsService {
   }
 
   async verifyPlaylistAccess(playlistId, userId) {
-    await this.verifyPlaylistOwner(playlistId, userId)
-  }
+    try {
+      await this.verifyPlaylistOwner(playlistId, userId)
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error
+      }
 
-  //   async addSongToPlaylist(songId) {
-  //     const query = {
-  //         text: `INSERT`
-  //     }
-  //   }
+      // eslint-disable-next-line no-useless-catch
+      try {
+        await this._collaborationService.verifyCollaborator(playlistId, userId)
+      } catch {
+        throw error
+      }
+    }
+  }
 }
 
 module.exports = PlaylistsService

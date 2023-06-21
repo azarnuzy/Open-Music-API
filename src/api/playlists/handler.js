@@ -51,7 +51,7 @@ class PlaylistsHandler {
     await this._service.deletePlaylistById(id)
 
     return {
-      status: 'succes',
+      status: 'success',
       message: 'Playlist berhasil dihapus',
     }
   }

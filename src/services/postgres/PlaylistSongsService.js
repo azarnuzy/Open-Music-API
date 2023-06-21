@@ -17,7 +17,6 @@ class PlaylistSongsService {
       values: [id, playlistId, songId],
     }
 
-    // console.log(playlistId, songId)
     const result = await this._pool.query(query)
     if (!result.rows[0].id) {
       throw new InvariantError('Playlist Songs gagal ditambahkan')
@@ -39,6 +38,21 @@ class PlaylistSongsService {
     }
 
     return result.rows.map((item) => item)
+  }
+
+  async deletePlaylistSongs(playlistId, songId) {
+    const query = {
+      text: 'DELETE FROM playlist_songs WHERE playlist_id = $2 AND song_id = $1 RETURNING id',
+      values: [songId, playlistId],
+    }
+    // console.log(playlistId, songId)
+    // DELETE FROM playlist_songs WHERE song_id = $1 AND playlist_id = $2
+    const result = await this._pool.query(query)
+    // console.log(result.rows)
+    // console.log(result.rows)
+    if (!result.rows.length) {
+      throw new InvariantError('Playlist Song gagal dihapus')
+    }
   }
 }
 

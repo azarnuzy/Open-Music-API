@@ -59,7 +59,26 @@ class PlaylistSongsHandler {
     })
 
     response.code(200)
-    // console.log(response)
+
+    return response
+  }
+
+  async deletePlaylistBySongId(request, h) {
+    this._validator.validatePlaylistSongsPayload(request.payload)
+
+    const { id: credentialId } = request.auth.credentials
+    const { id } = request.params
+    const { songId } = request.payload
+
+    await this._playlistsService.verifyPlaylistOwner(id, credentialId)
+    await this._playlistSongsService.deletePlaylistSongs(id, songId)
+
+    const response = h.response({
+      status: 'success',
+      message: 'Song in Playlist berhasil dihapus.',
+    })
+    response.code(200)
+
     return response
   }
 }
