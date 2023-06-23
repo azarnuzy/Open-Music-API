@@ -19,7 +19,6 @@ class PlaylistSongActivitiesService {
 
     const result = await this._pool.query(query)
 
-    console.log(result.rows)
     if (!result.rows[0].id) {
       throw new InvariantError('Playlist Song Activities gagal ditambahkan')
     }

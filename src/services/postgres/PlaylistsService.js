@@ -31,14 +31,17 @@ class PlaylistsService {
 
   async getPlaylists(owner) {
     const query = {
-      text: `SELECT playlists.id, playlists.name, users.username FROM playlists 
-        LEFT JOIN users ON users.id = playlists.owner
-        WHERE playlists.owner = $1`,
+      text: `SELECT playlists.id, playlists.name, users.username
+      FROM playlists
+      LEFT JOIN collaborations ON collaborations.playlist_id = playlists.id
+      LEFT JOIN users ON users.id = playlists.owner
+      WHERE collaborations.user_id = $1 OR playlists.owner = $1;
+        `,
       values: [owner],
     }
 
     const result = await this._pool.query(query)
-
+    // console.log(result.rows, owner)
     return result.rows.map(mapDBToModel)
   }
 
@@ -101,7 +104,7 @@ class PlaylistsService {
 
       // eslint-disable-next-line no-useless-catch
       try {
-        await this._collaborationService.verifyCollaborator(playlistId, userId)
+        await this._collaborationsService.verifyCollaborator(playlistId, userId)
       } catch {
         throw error
       }

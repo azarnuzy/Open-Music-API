@@ -24,7 +24,7 @@ class PlaylistSongsHandler {
     const { id } = request.params
     const { songId } = request.payload
 
-    await this._playlistsService.verifyPlaylistOwner(id, credentialId)
+    await this._playlistsService.verifyPlaylistAccess(id, credentialId)
     await this._songsService.getSongById(songId)
 
     // console.log(songId)
@@ -86,7 +86,7 @@ class PlaylistSongsHandler {
     const { id } = request.params
     const { songId } = request.payload
 
-    await this._playlistsService.verifyPlaylistOwner(id, credentialId)
+    await this._playlistsService.verifyPlaylistAccess(id, credentialId)
     await this._playlistSongsService.deletePlaylistSongs(id, songId)
 
     await this._playlistSongActivitiesService.addPlaylistSongActivities({
