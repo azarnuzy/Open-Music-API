@@ -40,9 +40,13 @@ class AlbumsHandler {
 
   async getAlbumByIdHandler(request) {
     const { id } = request.params
-    const albumTemp = await this._service.getAlbumById(id)
+    let albumTemp = await this._service.getAlbumById(id)
     const songs = await this._service.getSongsByAlbumId(id)
-
+    albumTemp = {
+      ...albumTemp,
+      coverUrl: albumTemp.cover,
+    }
+    delete albumTemp.cover
     const album = { ...albumTemp, songs }
     return {
       status: 'success',

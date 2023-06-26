@@ -1,6 +1,9 @@
 require('dotenv').config()
+
 const Hapi = require('@hapi/hapi')
+const Inert = require('@hapi/inert')
 const Jwt = require('@hapi/jwt')
+const path = require('path')
 
 const ClientError = require('./exceptions/ClientError')
 
@@ -49,6 +52,11 @@ const _exports = require('./api/exports')
 const ProducerService = require('./services/rabbitmq/ProducerService')
 const ExportSongsPlaylistValidator = require('./validator/exports')
 
+//  uploads
+const uploads = require('./api/uploads')
+const StorageService = require('./services/storage/StorageService')
+const UploadsValidator = require('./validator/uploads')
+
 const init = async () => {
   const collaborationsService = new CollaborationsService()
   const albumsService = new AlbumsService()
@@ -58,6 +66,9 @@ const init = async () => {
   const playlistsService = new PlaylistsService(collaborationsService)
   const playlistSongsService = new PlaylistSongsService()
   const playlistSongActivitiesService = new PlaylistSongActivitiesService()
+  const storageService = new StorageService(
+    path.resolve(__dirname, 'api/uploads/file/images')
+  )
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -73,6 +84,9 @@ const init = async () => {
   await server.register([
     {
       plugin: Jwt,
+    },
+    {
+      plugin: Inert,
     },
   ])
 
@@ -162,12 +176,19 @@ const init = async () => {
         validator: ExportSongsPlaylistValidator,
       },
     },
+    {
+      plugin: uploads,
+      options: {
+        storageService,
+        albumsService,
+        validator: UploadsValidator,
+      },
+    },
   ])
 
   server.ext('onPreResponse', (request, h) => {
     // mendapatkan konteks response dari request
     const { response } = request
-
     if (response instanceof Error) {
       // penanganan client error secara internal
       if (response instanceof ClientError) {
@@ -175,7 +196,6 @@ const init = async () => {
           status: 'fail',
           message: response.message,
         })
-
         newResponse.code(response.statusCode)
         return newResponse
       }
@@ -184,7 +204,7 @@ const init = async () => {
       if (!response.isServer) {
         return h.continue
       }
-      console.log(response.message)
+      // console.log(response.message)
       // penanganan server error sesuai kebutuhan
       const newResponse = h.response({
         status: 'error',
