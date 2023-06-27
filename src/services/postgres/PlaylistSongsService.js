@@ -5,8 +5,9 @@ const NotFoundError = require('../../exceptions/NotFoundError')
 // const { mapDBToModel } = require('../../utils/playlistSongsIndex')
 
 class PlaylistSongsService {
-  constructor() {
+  constructor(cacheService) {
     this._pool = new Pool()
+    this._cacheService = cacheService
   }
 
   async addPlaylistSongs({ playlistId, songId }) {
@@ -23,22 +24,34 @@ class PlaylistSongsService {
       throw new InvariantError('Playlist Songs gagal ditambahkan')
     }
 
+    await this._cacheService.delete(`playlistSongs:${playlistId}`)
+
     return result.rows[0].id
   }
 
   async getSongsByPlaylistId(id) {
-    const query = {
-      text: 'SELECT s.id, s.title, s.performer FROM playlist_songs p JOIN songs s ON p.song_id=s.id WHERE p.playlist_id = $1',
-      values: [id],
+    try {
+      const result = await this._cacheService.get(`playlistSongs:${id}`)
+      return JSON.parse(result)
+    } catch (error) {
+      const query = {
+        text: 'SELECT s.id, s.title, s.performer FROM playlist_songs p JOIN songs s ON p.song_id=s.id WHERE p.playlist_id = $1',
+        values: [id],
+      }
+
+      const result = await this._pool.query(query)
+
+      if (!result.rows.length) {
+        throw new NotFoundError('Playlist tidak ditemukan')
+      }
+
+      await this._cacheService.set(
+        `playlistSongs:${id}`,
+        JSON.stringify(result.rows)
+      )
+
+      return result.rows
     }
-
-    const result = await this._pool.query(query)
-
-    if (!result.rows.length) {
-      throw new NotFoundError('Playlist tidak ditemukan')
-    }
-
-    return result.rows.map((item) => item)
   }
 
   async deletePlaylistSongs(playlistId, songId) {
@@ -48,9 +61,12 @@ class PlaylistSongsService {
     }
     // DELETE FROM playlist_songs WHERE song_id = $1 AND playlist_id = $2
     const result = await this._pool.query(query)
+
     if (!result.rows.length) {
       throw new InvariantError('Playlist Song gagal dihapus')
     }
+
+    await this._cacheService.delete(`playlistSongs:${playlistId}`)
   }
 }
 
