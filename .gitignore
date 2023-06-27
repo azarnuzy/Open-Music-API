@@ -4,3 +4,4 @@ node_modules
 .prod.env
 package-lock.json
 *.zip
+/src/api/uploads/file/images/*
