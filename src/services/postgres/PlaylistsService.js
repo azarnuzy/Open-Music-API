@@ -59,7 +59,7 @@ class PlaylistsService {
       throw new NotFoundError('Playlist tidak ditemukan')
     }
 
-    return result.rows.map((item) => item)[0]
+    return result.rows[0]
   }
 
   async deletePlaylistById(id) {

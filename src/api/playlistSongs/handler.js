@@ -27,12 +27,10 @@ class PlaylistSongsHandler {
     await this._playlistsService.verifyPlaylistAccess(id, credentialId)
     await this._songsService.getSongById(songId)
 
-    // console.log(songId)
     const playlistSongsId = await this._playlistSongsService.addPlaylistSongs({
       playlistId: id,
       songId,
     })
-    // console.log(playlistSongsId)
 
     await this._playlistSongActivitiesService.addPlaylistSongActivities({
       playlistId: id,

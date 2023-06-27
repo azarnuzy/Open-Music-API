@@ -57,6 +57,10 @@ const uploads = require('./api/uploads')
 const StorageService = require('./services/storage/StorageService')
 const UploadsValidator = require('./validator/uploads')
 
+// album likes
+const albumLikes = require('./api/albumLikes')
+const AlbumLikesService = require('./services/postgres/AlbumLikesService')
+
 const init = async () => {
   const collaborationsService = new CollaborationsService()
   const albumsService = new AlbumsService()
@@ -69,6 +73,7 @@ const init = async () => {
   const storageService = new StorageService(
     path.resolve(__dirname, 'api/uploads/file/images')
   )
+  const albumLikesService = new AlbumLikesService()
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -184,11 +189,19 @@ const init = async () => {
         validator: UploadsValidator,
       },
     },
+    {
+      plugin: albumLikes,
+      options: {
+        albumLikesService,
+        albumsService,
+      },
+    },
   ])
 
   server.ext('onPreResponse', (request, h) => {
     // mendapatkan konteks response dari request
     const { response } = request
+
     if (response instanceof Error) {
       // penanganan client error secara internal
       if (response instanceof ClientError) {
