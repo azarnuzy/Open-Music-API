@@ -60,8 +60,12 @@ const UploadsValidator = require('./validator/uploads')
 // album likes
 const albumLikes = require('./api/albumLikes')
 const AlbumLikesService = require('./services/postgres/AlbumLikesService')
+const CacheService = require('./services/redis/CacheService')
+
+// cache
 
 const init = async () => {
+  const cacheService = new CacheService()
   const collaborationsService = new CollaborationsService()
   const albumsService = new AlbumsService()
   const songsService = new SongsService()
@@ -73,7 +77,7 @@ const init = async () => {
   const storageService = new StorageService(
     path.resolve(__dirname, 'api/uploads/file/images')
   )
-  const albumLikesService = new AlbumLikesService()
+  const albumLikesService = new AlbumLikesService(cacheService)
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -85,7 +89,6 @@ const init = async () => {
     },
   })
 
-  // console.log(PlaylistSongsValidator)
   await server.register([
     {
       plugin: Jwt,
@@ -217,7 +220,6 @@ const init = async () => {
       if (!response.isServer) {
         return h.continue
       }
-      // console.log(response.message)
       // penanganan server error sesuai kebutuhan
       const newResponse = h.response({
         status: 'error',

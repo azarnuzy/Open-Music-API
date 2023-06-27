@@ -41,7 +41,7 @@ class PlaylistsService {
     }
 
     const result = await this._pool.query(query)
-    // console.log(result.rows, owner)
+
     return result.rows.map(mapDBToModel)
   }
 

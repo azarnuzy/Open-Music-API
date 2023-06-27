@@ -11,7 +11,6 @@ class UploadsHandler {
 
   async postUploadCoverHandler(request, h) {
     const { cover } = request.payload
-    // console.log(request.payload)
     const { id } = request.params
     this._validator.validateImageHeaders(cover.hapi.headers)
 

@@ -8,7 +8,6 @@ module.exports = {
     server,
     { collaborationsService, playlistsService, validator }
   ) => {
-    // console.log(validator)
     const collaborationsHandler = new CollaborationsHandler(
       collaborationsService,
       playlistsService,

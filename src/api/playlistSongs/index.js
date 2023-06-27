@@ -14,7 +14,6 @@ module.exports = {
       validator,
     }
   ) => {
-    // console.log(validator)
     const playlistSongsHandler = new PlaylistSongsHandler(
       playlistSongsService,
       playlistsService,

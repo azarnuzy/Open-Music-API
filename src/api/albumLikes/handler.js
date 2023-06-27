@@ -35,13 +35,16 @@ class AlbumLikesHandler {
     const { id } = request.params
 
     const likes = await this._albumLikesService.getTotalAlbumLikes(id)
-
     const response = h.response({
       status: 'success',
       data: {
-        likes: Number(likes.likes),
+        likes: Number(likes.data.likes),
       },
     })
+
+    if (likes.isCache) {
+      response.header('X-Data-Source', 'cache')
+    }
     response.code(200)
     return response
   }
